@@ -95,7 +95,8 @@ namespace Nez.ImGuiTools.SceneGraphPanes
 				if (ImGui.Selectable("Destroy Entity"))
 					entity.Destroy();
 
-				if (ImGui.Selectable("Create Child Entity", false, ImGuiSelectableFlags.DontClosePopups))
+				// Old: ImGuiSelectableFlags.DontClosePopups
+				if (ImGui.Selectable("Create Child Entity", false, ImGuiSelectableFlags.NoAutoClosePopups))
 					ImGui.OpenPopup("create-new-entity");
 
 				if (ImGui.BeginPopup("create-new-entity"))

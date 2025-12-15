@@ -118,7 +118,7 @@ namespace Nez.ImGuiTools
 			colors[(int) ImGuiCol.TextSelectedBg] = new Num.Vector4(0.87f, 0.87f, 0.87f, 0.35f);
 			colors[(int) ImGuiCol.ModalWindowDimBg] = new Num.Vector4(0.80f, 0.80f, 0.80f, 0.35f);
 			colors[(int) ImGuiCol.DragDropTarget] = new Num.Vector4(1.00f, 1.00f, 0.00f, 0.90f);
-			colors[(int) ImGuiCol.NavHighlight] = new Num.Vector4(0.60f, 0.60f, 0.60f, 1.00f);
+			colors[(int) ImGuiCol.NavCursor] = new Num.Vector4(0.60f, 0.60f, 0.60f, 1.00f);
 			colors[(int) ImGuiCol.NavWindowingHighlight] = new Num.Vector4(1.00f, 1.00f, 1.00f, 0.70f);
 		}
 
@@ -174,16 +174,16 @@ namespace Nez.ImGuiTools
 			colors[(int) ImGuiCol.ResizeGripActive] = new Num.Vector4(0.87f, 0.87f, 0.87f, 0.74f);
 			colors[(int) ImGuiCol.Tab] = new Num.Vector4(0.01f, 0.01f, 0.01f, 0.86f);
 			colors[(int) ImGuiCol.TabHovered] = new Num.Vector4(0.29f, 0.29f, 0.29f, 1.00f);
-			colors[(int) ImGuiCol.TabActive] = new Num.Vector4(0.31f, 0.31f, 0.31f, 1.00f);
-			colors[(int) ImGuiCol.TabUnfocused] = new Num.Vector4(0.02f, 0.02f, 0.02f, 1.00f);
-			colors[(int) ImGuiCol.TabUnfocusedActive] = new Num.Vector4(0.19f, 0.19f, 0.19f, 1.00f);
+			colors[(int) ImGuiCol.TabSelected] = new Num.Vector4(0.31f, 0.31f, 0.31f, 1.00f);
+			colors[(int) ImGuiCol.TabDimmed] = new Num.Vector4(0.02f, 0.02f, 0.02f, 1.00f);
+			colors[(int) ImGuiCol.TabDimmedSelected] = new Num.Vector4(0.19f, 0.19f, 0.19f, 1.00f);
 			colors[(int) ImGuiCol.PlotLines] = new Num.Vector4(0.61f, 0.61f, 0.61f, 1.00f);
 			colors[(int) ImGuiCol.PlotLinesHovered] = new Num.Vector4(0.68f, 0.68f, 0.68f, 1.00f);
 			colors[(int) ImGuiCol.PlotHistogram] = new Num.Vector4(0.90f, 0.77f, 0.33f, 1.00f);
 			colors[(int) ImGuiCol.PlotHistogramHovered] = new Num.Vector4(0.87f, 0.55f, 0.08f, 1.00f);
 			colors[(int) ImGuiCol.TextSelectedBg] = new Num.Vector4(0.47f, 0.60f, 0.76f, 0.47f);
 			colors[(int) ImGuiCol.DragDropTarget] = new Num.Vector4(0.58f, 0.58f, 0.58f, 0.90f);
-			colors[(int) ImGuiCol.NavHighlight] = new Num.Vector4(0.60f, 0.60f, 0.60f, 1.00f);
+			colors[(int) ImGuiCol.NavCursor] = new Num.Vector4(0.60f, 0.60f, 0.60f, 1.00f);
 			colors[(int) ImGuiCol.NavWindowingHighlight] = new Num.Vector4(1.00f, 1.00f, 1.00f, 0.70f);
 			colors[(int) ImGuiCol.NavWindowingDimBg] = new Num.Vector4(0.80f, 0.80f, 0.80f, 0.20f);
 			colors[(int) ImGuiCol.ModalWindowDimBg] = new Num.Vector4(0.80f, 0.80f, 0.80f, 0.35f);
@@ -229,16 +229,16 @@ namespace Nez.ImGuiTools
 			colors[(int) ImGuiCol.ResizeGripActive] = new Num.Vector4(1.000f, 0.391f, 0.000f, 1.000f);
 			colors[(int) ImGuiCol.Tab] = new Num.Vector4(0.098f, 0.098f, 0.098f, 1.000f);
 			colors[(int) ImGuiCol.TabHovered] = new Num.Vector4(0.352f, 0.352f, 0.352f, 1.000f);
-			colors[(int) ImGuiCol.TabActive] = new Num.Vector4(0.195f, 0.195f, 0.195f, 1.000f);
-			colors[(int) ImGuiCol.TabUnfocused] = new Num.Vector4(0.098f, 0.098f, 0.098f, 1.000f);
-			colors[(int) ImGuiCol.TabUnfocusedActive] = new Num.Vector4(0.195f, 0.195f, 0.195f, 1.000f);
+			colors[(int) ImGuiCol.TabSelected] = new Num.Vector4(0.195f, 0.195f, 0.195f, 1.000f);
+			colors[(int) ImGuiCol.TabDimmed] = new Num.Vector4(0.098f, 0.098f, 0.098f, 1.000f);
+			colors[(int) ImGuiCol.TabDimmedSelected] = new Num.Vector4(0.195f, 0.195f, 0.195f, 1.000f);
 			colors[(int) ImGuiCol.PlotLines] = new Num.Vector4(0.469f, 0.469f, 0.469f, 1.000f);
 			colors[(int) ImGuiCol.PlotLinesHovered] = new Num.Vector4(1.000f, 0.391f, 0.000f, 1.000f);
 			colors[(int) ImGuiCol.PlotHistogram] = new Num.Vector4(0.586f, 0.586f, 0.586f, 1.000f);
 			colors[(int) ImGuiCol.PlotHistogramHovered] = new Num.Vector4(1.000f, 0.391f, 0.000f, 1.000f);
 			colors[(int) ImGuiCol.TextSelectedBg] = new Num.Vector4(1.000f, 1.000f, 1.000f, 0.156f);
 			colors[(int) ImGuiCol.DragDropTarget] = new Num.Vector4(1.000f, 0.391f, 0.000f, 1.000f);
-			colors[(int) ImGuiCol.NavHighlight] = new Num.Vector4(1.000f, 0.391f, 0.000f, 1.000f);
+			colors[(int) ImGuiCol.NavCursor] = new Num.Vector4(1.000f, 0.391f, 0.000f, 1.000f);
 			colors[(int) ImGuiCol.NavWindowingHighlight] = new Num.Vector4(1.000f, 0.391f, 0.000f, 1.000f);
 			colors[(int) ImGuiCol.NavWindowingDimBg] = new Num.Vector4(0.000f, 0.000f, 0.000f, 0.586f);
 			colors[(int) ImGuiCol.ModalWindowDimBg] = new Num.Vector4(0.000f, 0.000f, 0.000f, 0.586f);
@@ -320,7 +320,7 @@ namespace Nez.ImGuiTools
 			colors[(int) ImGuiCol.TextSelectedBg] = new Num.Vector4(0.26f, 0.59f, 0.98f, 0.35f);
 			colors[(int) ImGuiCol.ModalWindowDimBg] = new Num.Vector4(0.20f, 0.20f, 0.20f, 0.35f);
 			colors[(int) ImGuiCol.DragDropTarget] = new Num.Vector4(0.26f, 0.59f, 0.98f, 0.95f);
-			colors[(int) ImGuiCol.NavHighlight] = colors[(int) ImGuiCol.HeaderHovered];
+			colors[(int) ImGuiCol.NavCursor] = colors[(int) ImGuiCol.HeaderHovered];
 			colors[(int) ImGuiCol.NavWindowingHighlight] = new Num.Vector4(0.70f, 0.70f, 0.70f, 0.70f);
 		}
 

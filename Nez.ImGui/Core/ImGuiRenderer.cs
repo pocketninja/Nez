@@ -180,48 +180,24 @@ namespace Nez.ImGuiTools
 			var io = ImGui.GetIO();
 
 #if FNA
-			// forward clipboard methods to SDL
-			io.SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate<SetClipboardTextDelegate>(SetClipboardText);
-			io.GetClipboardTextFn = Marshal.GetFunctionPointerForDelegate<GetClipboardTextDelegate>(SDL2.SDL.SDL_GetClipboardText);
-#endif
-
-			_keys.Add(io.KeyMap[(int)ImGuiKey.Tab] = (int)Keys.Tab);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.LeftArrow] = (int)Keys.Left);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.RightArrow] = (int)Keys.Right);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.UpArrow] = (int)Keys.Up);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.DownArrow] = (int)Keys.Down);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.PageUp] = (int)Keys.PageUp);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.PageDown] = (int)Keys.PageDown);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.Home] = (int)Keys.Home);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.End] = (int)Keys.End);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.Delete] = (int)Keys.Delete);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.Backspace] = (int)Keys.Back);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.Enter] = (int)Keys.Enter);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.Escape] = (int)Keys.Escape);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.LeftCtrl] = (int)Keys.LeftControl);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.A] = (int)Keys.A);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.C] = (int)Keys.C);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.V] = (int)Keys.V);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.X] = (int)Keys.X);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.Y] = (int)Keys.Y);
-			_keys.Add(io.KeyMap[(int)ImGuiKey.Z] = (int)Keys.Z);
-
-
-#if !FNA
-			Core.Instance.Window.TextInput += (s, a) =>
-			{
-				if (a.Character == '\t')
-					return;
-
-				io.AddInputCharacter(a.Character);
-			};
+		// forward clipboard methods to SDL
+		io.SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate<SetClipboardTextDelegate>(SetClipboardText);
+		io.GetClipboardTextFn =
+Marshal.GetFunctionPointerForDelegate<GetClipboardTextDelegate>(SDL2.SDL.SDL_GetClipboardText);
+        TextInputEXT.TextInput += c =>
+		{
+			if (c == '\t')
+				return;
+			ImGui.GetIO().AddInputCharacter(c);
+		};
 #else
-			TextInputEXT.TextInput += c =>
-			{
-				if (c == '\t')
-					return;
-				ImGui.GetIO().AddInputCharacter(c);
-			};
+		Core.Instance.Window.TextInput += (s, a) =>
+		{
+			if (a.Character == '\t')
+				return;
+
+			io.AddInputCharacter(a.Character);
+		};
 #endif
 		}
 
@@ -254,9 +230,13 @@ namespace Nez.ImGuiTools
 			var mouse = Input.CurrentMouseState;
 			var keyboard = Input.CurrentKeyboardState;
 
-			for (int i = 0; i < _keys.Count; i++)
+			foreach (Keys key in Enum.GetValues(typeof(Keys)))
 			{
-				io.KeysDown[_keys[i]] = keyboard.IsKeyDown((Keys)_keys[i]);
+				var isDown = keyboard.IsKeyDown(key);
+				var translatedKey = TranslateKey(key);
+            
+				// TODO: This needs more work, specifically with regard to inputs for text fields/etc...
+				io.AddKeyEvent(translatedKey, isDown);
 			}
 
 			io.KeyShift = keyboard.IsKeyDown(Keys.LeftShift) || keyboard.IsKeyDown(Keys.RightShift);
@@ -277,6 +257,177 @@ namespace Nez.ImGuiTools
 			var scrollDelta = mouse.ScrollWheelValue - _scrollWheelValue;
 			io.MouseWheel = scrollDelta > 0 ? 1 : scrollDelta < 0 ? -1 : 0;
 			_scrollWheelValue = mouse.ScrollWheelValue;
+		}
+
+		ImGuiKey TranslateKey(Keys key)
+		{
+			switch (key)
+			{
+				// case Keys.ModNone: return ImGuiKey.ModNone;
+				case Keys.None: return ImGuiKey.None;
+				// case Keys.NamedKey_COUNT: return ImGuiKey.NamedKey_COUNT;
+				// case Keys.NamedKey_BEGIN: return ImGuiKey.NamedKey_BEGIN;
+				case Keys.Tab: return ImGuiKey.Tab;
+				case Keys.Left: return ImGuiKey.LeftArrow;
+				case Keys.Right: return ImGuiKey.RightArrow;
+				case Keys.Up: return ImGuiKey.UpArrow;
+				case Keys.Down: return ImGuiKey.DownArrow;
+				case Keys.PageUp: return ImGuiKey.PageUp;
+				case Keys.PageDown: return ImGuiKey.PageDown;
+				case Keys.Home: return ImGuiKey.Home;
+				case Keys.End: return ImGuiKey.End;
+				case Keys.Insert: return ImGuiKey.Insert;
+				case Keys.Delete: return ImGuiKey.Delete;
+				case Keys.Back: return ImGuiKey.Backspace;
+				case Keys.Space: return ImGuiKey.Space;
+				case Keys.Enter: return ImGuiKey.Enter;
+				case Keys.Escape: return ImGuiKey.Escape;
+				case Keys.LeftControl: return ImGuiKey.LeftCtrl;
+				case Keys.LeftShift: return ImGuiKey.LeftShift;
+				case Keys.LeftAlt: return ImGuiKey.LeftAlt;
+				case Keys.LeftWindows: return ImGuiKey.LeftSuper;
+				case Keys.RightControl: return ImGuiKey.RightCtrl;
+				case Keys.RightShift: return ImGuiKey.RightShift;
+				case Keys.RightAlt: return ImGuiKey.RightAlt;
+				case Keys.RightWindows: return ImGuiKey.RightSuper;
+				// case Keys.Menu: return ImGuiKey.Menu;
+				// case Keys._0: return ImGuiKey._0;
+				// case Keys._1: return ImGuiKey._1;
+				// case Keys._2: return ImGuiKey._2;
+				// case Keys._3: return ImGuiKey._3;
+				// case Keys._4: return ImGuiKey._4;
+				// case Keys._5: return ImGuiKey._5;
+				// case Keys._6: return ImGuiKey._6;
+				// case Keys._7: return ImGuiKey._7;
+				// case Keys._8: return ImGuiKey._8;
+				// case Keys._9: return ImGuiKey._9;
+				case Keys.A: return ImGuiKey.A;
+				case Keys.B: return ImGuiKey.B;
+				case Keys.C: return ImGuiKey.C;
+				case Keys.D: return ImGuiKey.D;
+				case Keys.E: return ImGuiKey.E;
+				case Keys.F: return ImGuiKey.F;
+				case Keys.G: return ImGuiKey.G;
+				case Keys.H: return ImGuiKey.H;
+				case Keys.I: return ImGuiKey.I;
+				case Keys.J: return ImGuiKey.J;
+				case Keys.K: return ImGuiKey.K;
+				case Keys.L: return ImGuiKey.L;
+				case Keys.M: return ImGuiKey.M;
+				case Keys.N: return ImGuiKey.N;
+				case Keys.O: return ImGuiKey.O;
+				case Keys.P: return ImGuiKey.P;
+				case Keys.Q: return ImGuiKey.Q;
+				case Keys.R: return ImGuiKey.R;
+				case Keys.S: return ImGuiKey.S;
+				case Keys.T: return ImGuiKey.T;
+				case Keys.U: return ImGuiKey.U;
+				case Keys.V: return ImGuiKey.V;
+				case Keys.W: return ImGuiKey.W;
+				case Keys.X: return ImGuiKey.X;
+				case Keys.Y: return ImGuiKey.Y;
+				case Keys.Z: return ImGuiKey.Z;
+				case Keys.F1: return ImGuiKey.F1;
+				case Keys.F2: return ImGuiKey.F2;
+				case Keys.F3: return ImGuiKey.F3;
+				case Keys.F4: return ImGuiKey.F4;
+				case Keys.F5: return ImGuiKey.F5;
+				case Keys.F6: return ImGuiKey.F6;
+				case Keys.F7: return ImGuiKey.F7;
+				case Keys.F8: return ImGuiKey.F8;
+				case Keys.F9: return ImGuiKey.F9;
+				case Keys.F10: return ImGuiKey.F10;
+				case Keys.F11: return ImGuiKey.F11;
+				case Keys.F12: return ImGuiKey.F12;
+				case Keys.F13: return ImGuiKey.F13;
+				case Keys.F14: return ImGuiKey.F14;
+				case Keys.F15: return ImGuiKey.F15;
+				case Keys.F16: return ImGuiKey.F16;
+				case Keys.F17: return ImGuiKey.F17;
+				case Keys.F18: return ImGuiKey.F18;
+				case Keys.F19: return ImGuiKey.F19;
+				case Keys.F20: return ImGuiKey.F20;
+				case Keys.F21: return ImGuiKey.F21;
+				case Keys.F22: return ImGuiKey.F22;
+				case Keys.F23: return ImGuiKey.F23;
+				case Keys.F24: return ImGuiKey.F24;
+				case Keys.OemQuotes: return ImGuiKey.Apostrophe;
+				case Keys.OemComma: return ImGuiKey.Comma;
+				case Keys.OemMinus: return ImGuiKey.Minus;
+				case Keys.OemPeriod: return ImGuiKey.Period;
+				case Keys.OemQuestion: return ImGuiKey.Slash; //OemBackslash?
+				case Keys.OemSemicolon: return ImGuiKey.Semicolon;
+				case Keys.OemPlus: return ImGuiKey.Equal;
+				case Keys.OemOpenBrackets: return ImGuiKey.LeftBracket;
+				case Keys.OemBackslash: return ImGuiKey.Backslash;
+				case Keys.OemCloseBrackets: return ImGuiKey.RightBracket;
+				// case Keys.GraveAccent: return ImGuiKey.GraveAccent;
+				case Keys.CapsLock: return ImGuiKey.CapsLock;
+				case Keys.Scroll: return ImGuiKey.ScrollLock;
+				case Keys.NumLock: return ImGuiKey.NumLock;
+				case Keys.PrintScreen: return ImGuiKey.PrintScreen;
+				case Keys.Pause: return ImGuiKey.Pause;
+				case Keys.NumPad0: return ImGuiKey.Keypad0;
+				case Keys.NumPad1: return ImGuiKey.Keypad1;
+				case Keys.NumPad2: return ImGuiKey.Keypad2;
+				case Keys.NumPad3: return ImGuiKey.Keypad3;
+				case Keys.NumPad4: return ImGuiKey.Keypad4;
+				case Keys.NumPad5: return ImGuiKey.Keypad5;
+				case Keys.NumPad6: return ImGuiKey.Keypad6;
+				case Keys.NumPad7: return ImGuiKey.Keypad7;
+				case Keys.NumPad8: return ImGuiKey.Keypad8;
+				case Keys.NumPad9: return ImGuiKey.Keypad9;
+				case Keys.Multiply: return ImGuiKey.KeypadMultiply;
+				case Keys.Subtract: return ImGuiKey.KeypadSubtract;
+				case Keys.Add: return ImGuiKey.KeypadAdd;
+				// case Keys.NumPadEnter: return ImGuiKey.KeypadEnter; ??
+				// case Keys.NumPadEqual: return ImGuiKey.KeypadEqual; ??
+				case Keys.BrowserBack: return ImGuiKey.AppBack;
+				case Keys.BrowserForward: return ImGuiKey.AppForward;
+				// case Keys.GamepadStart: return ImGuiKey.GamepadStart;
+				// case Keys.GamepadBack: return ImGuiKey.GamepadBack;
+				// case Keys.GamepadFaceLeft: return ImGuiKey.GamepadFaceLeft;
+				// case Keys.GamepadFaceRight: return ImGuiKey.GamepadFaceRight;
+				// case Keys.GamepadFaceUp: return ImGuiKey.GamepadFaceUp;
+				// case Keys.GamepadFaceDown: return ImGuiKey.GamepadFaceDown;
+				// case Keys.GamepadDpadLeft: return ImGuiKey.GamepadDpadLeft;
+				// case Keys.GamepadDpadRight: return ImGuiKey.GamepadDpadRight;
+				// case Keys.GamepadDpadUp: return ImGuiKey.GamepadDpadUp;
+				// case Keys.GamepadDpadDown: return ImGuiKey.GamepadDpadDown;
+				// case Keys.GamepadL1: return ImGuiKey.GamepadL1;
+				// case Keys.GamepadR1: return ImGuiKey.GamepadR1;
+				// case Keys.GamepadL2: return ImGuiKey.GamepadL2;
+				// case Keys.GamepadR2: return ImGuiKey.GamepadR2;
+				// case Keys.GamepadL3: return ImGuiKey.GamepadL3;
+				// case Keys.GamepadR3: return ImGuiKey.GamepadR3;
+				// case Keys.GamepadLStickLeft: return ImGuiKey.GamepadLStickLeft;
+				// case Keys.GamepadLStickRight: return ImGuiKey.GamepadLStickRight;
+				// case Keys.GamepadLStickUp: return ImGuiKey.GamepadLStickUp;
+				// case Keys.GamepadLStickDown: return ImGuiKey.GamepadLStickDown;
+				// case Keys.GamepadRStickLeft: return ImGuiKey.GamepadRStickLeft;
+				// case Keys.GamepadRStickRight: return ImGuiKey.GamepadRStickRight;
+				// case Keys.GamepadRStickUp: return ImGuiKey.GamepadRStickUp;
+				// case Keys.GamepadRStickDown: return ImGuiKey.GamepadRStickDown;
+				// case Keys.MouseLeft: return ImGuiKey.MouseLeft;
+				// case Keys.MouseRight: return ImGuiKey.MouseRight;
+				// case Keys.MouseMiddle: return ImGuiKey.MouseMiddle;
+				// case Keys.MouseX1: return ImGuiKey.MouseX1;
+				// case Keys.MouseX2: return ImGuiKey.MouseX2;
+				// case Keys.MouseWheelX: return ImGuiKey.MouseWheelX;
+				// case Keys.MouseWheelY: return ImGuiKey.MouseWheelY;
+				// case Keys.ReservedForModCtrl: return ImGuiKey.ReservedForModCtrl;
+				// case Keys.ReservedForModShift: return ImGuiKey.ReservedForModShift;
+				// case Keys.ReservedForModAlt: return ImGuiKey.ReservedForModAlt;
+				// case Keys.ReservedForModSuper: return ImGuiKey.ReservedForModSuper;
+				// case Keys.NamedKey_END: return ImGuiKey.NamedKey_END;
+				// case Keys.ModCtrl: return ImGuiKey.ModCtrl;
+				// case Keys.ModShift: return ImGuiKey.ModShift;
+				// case Keys.ModAlt: return ImGuiKey.ModAlt;
+				// case Keys.ModSuper: return ImGuiKey.ModSuper;
+				// case Keys.ModMask: return ImGuiKey.ModMask; // 0x0000F000				
+
+				default: return ImGuiKey.None;
+			}
 		}
 
 		#endregion
@@ -348,7 +499,7 @@ namespace Nez.ImGuiTools
 
 			for (var n = 0; n < drawData.CmdListsCount; n++)
 			{
-				var cmdList = drawData.CmdListsRange[n];
+				var cmdList = drawData.CmdLists[n];
 
 				fixed (void* vtxDstPtr = &_vertexData[vtxOffset * _vertexDeclarationSize])
 				fixed (void* idxDstPtr = &_indexData[idxOffset * sizeof(ushort)])
@@ -378,7 +529,7 @@ namespace Nez.ImGuiTools
 
 			for (int n = 0; n < drawData.CmdListsCount; n++)
 			{
-				var cmdList = drawData.CmdListsRange[n];
+				var cmdList = drawData.CmdLists[n];
 				for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; cmdi++)
 				{
 					var drawCmd = cmdList.CmdBuffer[cmdi];
