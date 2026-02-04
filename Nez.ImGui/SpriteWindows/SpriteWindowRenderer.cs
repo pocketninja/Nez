@@ -55,7 +55,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 			EndRender();
 		}
-		
+
 		public unsafe IntPtr ResolveWindowContext(AbstractSpriteWindowComponent window)
 		{
 			if (Contexts.TryGetValue(window.Entity.Id, out var context))
@@ -64,12 +64,12 @@ namespace Nez.ImGuiTools.SpriteWindows
 			}
 
 			var newContext = ImGui.CreateContext();
-        
+
 			// Need to switch temporarily to configure its IO...
 			var currentContext = ImGui.GetCurrentContext();
 			ImGui.SetCurrentContext(newContext);
 			SpriteWindowSystem.SetupStyle();
-        
+
 			var io = ImGui.GetIO();
 
 			if (SharedFontAtlas.NativePtr == null)
@@ -81,14 +81,14 @@ namespace Nez.ImGuiTools.SpriteWindows
 			{
 				io.NativePtr->Fonts = SharedFontAtlas.NativePtr;
 			}
-        
+
 			ImGui.SetCurrentContext(currentContext);
 
 			Contexts[window.Entity.Id] = newContext;
 
 			return newContext;
 		}
-		
+
 		public RenderTarget2D ResolveRenderTarget(AbstractSpriteWindowComponent window)
 		{
 			if (Targets.TryGetValue(window.Entity.Id, out var target))
@@ -106,7 +106,4 @@ namespace Nez.ImGuiTools.SpriteWindows
 			return newTarget;
 		}
 	}
-	
-	
-	
 }

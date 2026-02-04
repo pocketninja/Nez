@@ -8,7 +8,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 	public class SpriteWindowSystem
 	{
 		public static ImGuiRenderer Renderer;
-		
+
 		private static int _scrollWheelValue;
 
 		private static VirtualButton _gamepadDpadUp = new VirtualButton();
@@ -158,8 +158,10 @@ namespace Nez.ImGuiTools.SpriteWindows
 			if (Core.Scene != null)
 			{
 				var scale = new Microsoft.Xna.Framework.Vector2(
-					Core.Scene.SceneRenderTarget.Width / (float)Core.GraphicsDevice.PresentationParameters.BackBufferWidth,
-					Core.Scene.SceneRenderTarget.Height / (float)Core.GraphicsDevice.PresentationParameters.BackBufferHeight
+					Core.Scene.SceneRenderTarget.Width /
+					(float)Core.GraphicsDevice.PresentationParameters.BackBufferWidth,
+					Core.Scene.SceneRenderTarget.Height /
+					(float)Core.GraphicsDevice.PresentationParameters.BackBufferHeight
 				);
 
 				position = Nez.Input.RawMousePosition.ToVector2() * scale;
