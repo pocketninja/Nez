@@ -1,7 +1,7 @@
 ﻿using Nez.Tiled;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
-
+using System.Linq;
 
 namespace Nez
 {
@@ -14,7 +14,7 @@ namespace Nez
 		/// <summary>
 		/// if null, all layers will be rendered
 		/// </summary>
-		public int[] LayerIndicesToRender;
+		public ITmxLayer[] LayersToRender;
 
 		public bool AutoUpdateTilesets = true;
 
@@ -34,29 +34,52 @@ namespace Nez
 			_shouldCreateColliders = shouldCreateColliders;
 
 			if (collisionLayerName != null)
-				CollisionLayer = tiledMap.TileLayers[collisionLayerName];
+				CollisionLayer = tiledMap.GetLayer(collisionLayerName) as TmxLayer;
 		}
 
 		/// <summary>
 		/// sets this component to only render a single layer
 		/// </summary>
 		/// <param name="layerName">Layer name.</param>
-		public void SetLayerToRender(string layerName)
+		/// <param name="separator">An optional separator character to use to get layers nested in group layers.</param>
+		public void SetLayerToRender(string layerName, char separator = '/')
 		{
-			LayerIndicesToRender = new int[1];
-			LayerIndicesToRender[0] = TiledMap.Layers.IndexOf(TiledMap.GetLayer(layerName));
+			LayersToRender = new ITmxLayer[1];
+			LayersToRender[0] = TiledMap.GetLayer(layerName, separator);
 		}
 
 		/// <summary>
-		/// sets which layers should be rendered by this component by name. If you know the indices you can set layerIndicesToRender directly.
+		/// sets which layers should be rendered by this component by name. If you know the indices you can use
+		/// <see cref="SetLayerIndicesToRender"/> instead.
 		/// </summary>
+		/// <param name="separator">An optional separator character to use to get layers nested in group layers.</param>
 		/// <param name="layerNames">Layer names.</param>
-		public void SetLayersToRender(params string[] layerNames)
+		public void SetLayersToRender(char separator, params string[] layerNames)
 		{
-			LayerIndicesToRender = new int[layerNames.Length];
+			LayersToRender = new ITmxLayer[layerNames.Length];
 
 			for (var i = 0; i < layerNames.Length; i++)
-				LayerIndicesToRender[i] = TiledMap.Layers.IndexOf(TiledMap.GetLayer(layerNames[i]));
+				LayersToRender[i] = TiledMap.GetLayer(layerNames[i], separator);
+		}
+
+		/// <summary>
+		/// sets which layers should be rendered by this component by name. If you know the indices you can use
+		/// <see cref="SetLayerIndicesToRender"/> instead.
+		/// </summary>
+		/// <param name="layerNames">Layer names.</param>
+		public void SetLayersToRender(params string[] layerNames) => SetLayersToRender('/', layerNames);
+
+		/// <summary>
+		/// sets which layers should be rendered by this component by index. Because the index is used on <see cref="TmxMap.Layers"/>,
+		/// using this function restricts you to top-level layers in the map.
+		/// </summary>
+		/// <param name="layerIndices">Layer indices.</param>
+		public void SetLayerIndicesToRender(params int[] layerIndices)
+		{
+			LayersToRender = new ITmxLayer[layerIndices.Length];
+
+			for (int i = 0; i < layerIndices.Length; i++)
+				LayersToRender[i] = TiledMap.Layers[i];
 		}
 
 
@@ -129,16 +152,16 @@ namespace Nez
 
 		public override void Render(Batcher batcher, Camera camera)
 		{
-			if (LayerIndicesToRender == null)
+			if (LayersToRender == null)
 			{
 				TiledRendering.RenderMap(TiledMap, batcher, Entity.Transform.Position + _localOffset, Transform.Scale, LayerDepth, camera.Bounds);
 			}
 			else
 			{
-				for (var i = 0; i < TiledMap.Layers.Count; i++)
+				foreach (var layer in LayersToRender)
 				{
-					if (TiledMap.Layers[i].Visible && LayerIndicesToRender.Contains(i))
-						TiledRendering.RenderLayer(TiledMap.Layers[i], batcher, Entity.Transform.Position + _localOffset, Transform.Scale, LayerDepth, camera.Bounds);
+					if (layer.Visible)
+						TiledRendering.RenderLayer(layer, batcher, Entity.Transform.Position + _localOffset, Transform.Scale, LayerDepth, camera.Bounds);
 				}
 			}
 		}

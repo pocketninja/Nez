@@ -50,11 +50,47 @@ namespace Nez.Tiled
 		}
 
 		/// <summary>
-		/// gets the TiledLayer by name
+		/// gets the TiledLayer by name or path if it is nested in group layers
 		/// </summary>
 		/// <returns>The layer.</returns>
-		/// <param name="name">Name.</param>
-		public ITmxLayer GetLayer(string name) => Layers.Contains(name) ? Layers[name] : null;
+		/// <param name="path">
+		/// Either the top-level layer name or a path made of <paramref name="separator"/> characters for a layer nested in group layers.
+		/// </param>
+		/// <param name="separator">An optional separator character to use to get layers nested in group layers.</param>
+		public ITmxLayer GetLayer(string path, char separator = '/') => GetLayerHelper(Layers, path, separator);
+
+		private static ITmxLayer GetLayerHelper(TmxList<ITmxLayer> layers, string path, char separator = '/')
+		{
+			if (layers.Contains(path))
+				return layers[path];
+
+			// If we couldn't find a top-level layer exactly matching the requested name, try to search in group layers instead
+			var currentPath = path;
+			var currentLayers = layers;
+			foreach (var layer in currentLayers)
+			{
+				if (!currentPath.StartsWith(layer.Name))
+					continue;
+
+				string newPath = currentPath.Substring(layer.Name.Length);
+
+				if (newPath.Length == 0)
+					return layer;
+
+				if (newPath[0] != separator)
+					continue;
+
+				if (!(layer is TmxGroup group))
+					return null;
+
+				currentPath = newPath.Substring(1); // Remove the separator
+				currentLayers = group.Layers;
+
+				return GetLayerHelper(currentLayers, currentPath, separator);
+			}
+
+			return null;
+		}
 
 		/// <summary>
 		/// gets the ITmxLayer by index
@@ -65,12 +101,15 @@ namespace Nez.Tiled
 		public T GetLayer<T>(int index) where T : ITmxLayer => (T)Layers[index];
 
 		/// <summary>
-		/// gets the ITmxLayer by name
+		/// gets the ITmxLayer by path
 		/// </summary>
 		/// <returns>The layer.</returns>
-		/// <param name="name">Name.</param>
-		/// <typeparam name="T">The 1st type parameter.</typeparam>
-		public T GetLayer<T>(string name) where T : ITmxLayer => (T)GetLayer(name);
+		/// <param name="path">
+		/// Either the top-level layer name or a path made of <paramref name="separator"/> characters for a layer nested in group layers.
+		/// </param>
+		/// <param name="separator">An optional separator character to use to get layers nested in group layers.</param>
+		/// <typeparam path="T">The 1st type parameter.</typeparam>
+		public T GetLayer<T>(string path, char separator = '/') where T : ITmxLayer => (T)GetLayer(path, separator);
 
 		/// <summary>
 		/// gets the TmxObjectGroup with the given name
@@ -187,7 +226,7 @@ namespace Nez.Tiled
 
 			return y * TileHeight;
 		}
-		
+
 		struct OffsetHex
 		{
 			public int q;
