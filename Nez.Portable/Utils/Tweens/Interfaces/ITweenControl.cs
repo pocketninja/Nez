@@ -34,5 +34,30 @@ namespace Nez.Tweens
 		/// </summary>
 		/// <returns>The target object.</returns>
 		object GetTargetObject();
+
+		/// <summary>
+		/// Get the elapsed time of the tween.
+		/// </summary>
+		/// <returns>the elapsed time.</returns>
+		float ElapsedTime();
+
+		/// <summary>
+		/// Get the elapsed time of the tween as a value between 0=>1 (ie, percentage)
+		/// </summary>
+		/// <returns>the elapsed time between 0=>1</returns>
+		float ElapsedTime01();
+
+		/// <summary>
+		/// Get the duration of the tween.
+		/// </summary>
+		/// <returns>the duration</returns>
+		float Duration();
+
+		/// <summary>
+		/// Get the time remaining.
+		/// </summary>
+		/// <returns>the time remaining</returns>
+		float TimeRemaining();
+		
 	}
 }

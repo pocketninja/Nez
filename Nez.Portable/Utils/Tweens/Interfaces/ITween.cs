@@ -108,5 +108,11 @@ namespace Nez.Tweens
 		/// <returns>The next tween.</returns>
 		/// <param name="nextTween">Next tween.</param>
 		ITween<T> SetNextTween(ITweenable nextTween);
+
+		/// <summary>
+		/// Chainable. Set a new target value for the tween.
+		/// </summary>
+		/// <param name="newValue">The new value.</param>
+		ITween<T> SetNewToValue(T newValue);
 	}
 }

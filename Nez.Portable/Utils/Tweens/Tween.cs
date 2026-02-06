@@ -160,6 +160,20 @@ namespace Nez.Tweens
 			return this;
 		}
 
+		public ITween<T> SetNewToValue(T newValue)
+		{
+			_toValue = newValue;
+			
+			// Make sure the new value is updated to match relative.
+			// TODO: We don't use this ourselves, make sure this actually works accordingly to common usage.
+			if (_isRelative)
+			{
+				SetIsRelative();
+			}
+
+			return this;
+		}
+
 		#endregion
 
 
@@ -318,6 +332,26 @@ namespace Nez.Tweens
 		public object GetTargetObject()
 		{
 			return _target.GetTargetObject();
+		}
+
+		public float ElapsedTime()
+		{
+			return _elapsedTime;
+		}
+
+		public float ElapsedTime01()
+		{
+			return _elapsedTime / _duration;
+		}
+
+		public float Duration()
+		{
+			return _duration;
+		}
+
+		public float TimeRemaining()
+		{
+			return _duration - _elapsedTime;
 		}
 
 		#endregion
