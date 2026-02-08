@@ -38,6 +38,11 @@ namespace Nez.ImGuiTools.SpriteWindows
 			return renderer;
 		}
 
+		public virtual void SetupStyle()
+		{
+			NezImGuiThemes.DarkTheme2();
+		}
+
 		public override void OnAddedToEntity()
 		{
 			base.OnAddedToEntity();

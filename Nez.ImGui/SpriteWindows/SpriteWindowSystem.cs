@@ -44,25 +44,6 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 			io.ConfigFlags |= ImGuiConfigFlags.NavEnableGamepad;
 			io.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;
-
-			SetupStyle();
-		}
-
-		public static void SetupStyle()
-		{
-			var style = ImGui.GetStyle();
-			NezImGuiThemes.DarkTheme2();
-			// NezImGuiThemes.DefaultLightTheme();
-
-			// style.ChildRounding = 0;
-			// style.FrameRounding = 0;
-			// style.GrabRounding = 0;
-			// style.PopupRounding = 0;
-			// style.ScrollbarRounding = 0;
-			// style.TabRounding = 0;
-			// style.WindowRounding = 0;
-			//
-			// style.Colors[(int)ImGuiCol.WindowBg] = new Vector4(0.13f, 0.12f, 0.12f, .80f);
 		}
 
 		public static void BeforeLayout(float deltaTime, AbstractSpriteWindowComponent window)

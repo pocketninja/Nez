@@ -13,7 +13,7 @@ namespace Nez
 		public enum SceneResolutionPolicy
 		{
 			/// <summary>
-			/// Default. RenderTarget matches the sceen size
+			/// Default. RenderTarget matches the screen size
 			/// </summary>
 			None,
 

@@ -68,7 +68,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 			// Need to switch temporarily to configure its IO...
 			var currentContext = ImGui.GetCurrentContext();
 			ImGui.SetCurrentContext(newContext);
-			SpriteWindowSystem.SetupStyle();
+			window.SetupStyle();
 
 			var io = ImGui.GetIO();
 
