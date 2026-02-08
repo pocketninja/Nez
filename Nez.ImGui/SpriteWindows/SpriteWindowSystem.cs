@@ -56,7 +56,6 @@ namespace Nez.ImGuiTools.SpriteWindows
 		private static void UpdateInput(AbstractSpriteWindowComponent window)
 		{
 			var io = ImGui.GetIO();
-
 			// io.DisplaySize = new Vector2(
 			//     window.WindowWidth,
 			//     window.WindowHeight
@@ -133,20 +132,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 			io.KeyAlt = keyboard.IsKeyDown(Keys.LeftAlt) || keyboard.IsKeyDown(Keys.RightAlt);
 			io.KeySuper = keyboard.IsKeyDown(Keys.LeftWindows) || keyboard.IsKeyDown(Keys.RightWindows);
 
-			var position = new Microsoft.Xna.Framework.Vector2(mouse.X, mouse.Y);
-
-			// Scale to scene design size
-			if (Core.Scene != null)
-			{
-				var scale = new Microsoft.Xna.Framework.Vector2(
-					Core.Scene.SceneRenderTarget.Width /
-					(float)Core.GraphicsDevice.PresentationParameters.BackBufferWidth,
-					Core.Scene.SceneRenderTarget.Height /
-					(float)Core.GraphicsDevice.PresentationParameters.BackBufferHeight
-				);
-
-				position = Nez.Input.RawMousePosition.ToVector2() * scale;
-			}
+			var position = Core.Scene.Camera.ScreenToWorldPoint(mouse.Position);
 
 			// Adjust for the entity window position/rotation and size
 			var localPosition = Microsoft.Xna.Framework.Vector2.Transform(
@@ -158,7 +144,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 			// io.AddMousePosEvent(position.X, position.Y);
 			io.AddMousePosEvent(localPosition.X, localPosition.Y);
-			io.MouseDrawCursor = false; // DrawImGuiMouseCursor;
+			io.MouseDrawCursor = window.DrawMouseCursor;
 
 			io.MouseDown[0] = mouse.LeftButton == ButtonState.Pressed;
 			io.MouseDown[1] = mouse.RightButton == ButtonState.Pressed;

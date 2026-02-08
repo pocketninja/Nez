@@ -23,6 +23,8 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 		protected RenderTarget2D RenderTarget = null;
 
+		public virtual bool DrawMouseCursor => false;
+
 		protected SpriteWindowRenderer ResolveWindowRenderer()
 		{
 			var renderer = Core.Scene.GetRenderer<SpriteWindowRenderer>();
