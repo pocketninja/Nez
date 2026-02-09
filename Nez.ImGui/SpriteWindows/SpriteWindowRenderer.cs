@@ -93,7 +93,15 @@ namespace Nez.ImGuiTools.SpriteWindows
 		{
 			if (Targets.TryGetValue(window.Entity.Id, out var target))
 			{
-				return target;
+				if (target.Width != window.WindowWidth || target.Height != window.WindowHeight)
+				{
+					target.Dispose();
+					Targets.Remove(window.Entity.Id);
+				}
+				else
+				{
+					return target;
+				}
 			}
 
 			var newTarget = RenderTarget.Create(
