@@ -44,6 +44,14 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 			io.ConfigFlags |= ImGuiConfigFlags.NavEnableGamepad;
 			io.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;
+			
+			// Core.Instance.Window.TextInput += (s, a) =>
+			// {
+			// 	if (a.Character == '\t')
+			// 		return;
+			//
+			// 	io.AddInputCharacter(a.Character);
+			// };
 		}
 
 		public static void BeforeLayout(float deltaTime, AbstractSpriteWindowComponent window)
