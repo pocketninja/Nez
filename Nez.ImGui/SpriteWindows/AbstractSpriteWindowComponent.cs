@@ -1,8 +1,9 @@
-using System.Numerics;
 using ImGuiNET;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nez.Sprites;
 using Nez.Textures;
+using Vector2 = System.Numerics.Vector2;
 
 namespace Nez.ImGuiTools.SpriteWindows
 {
@@ -24,6 +25,13 @@ namespace Nez.ImGuiTools.SpriteWindows
 		protected RenderTarget2D RenderTarget = null;
 
 		public virtual bool DrawMouseCursor => false;
+		
+		public new RenderableComponent SetColor(Color color)
+		{
+			base.SetColor(color);
+			Entity.GetComponent<SpriteRenderer>()?.SetColor(color);
+			return this;
+		}
 
 		protected SpriteWindowRenderer ResolveWindowRenderer()
 		{
@@ -53,6 +61,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 			var sprite = new Sprite(RenderTarget);
 			var spriteRenderer = new SpriteRenderer(sprite);
+			spriteRenderer.SetColor(Color);
 			Entity.AddComponent(spriteRenderer);
 		}
 
