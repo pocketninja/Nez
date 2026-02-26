@@ -23,13 +23,43 @@ namespace Nez.ImGuiTools.SpriteWindows
 			| ImGuiWindowFlags.NoBringToFrontOnFocus;
 
 		protected RenderTarget2D RenderTarget = null;
+		private SpriteRenderer _spriteRenderer;
 
 		public virtual bool DrawMouseCursor => false;
-		
+
+		/// <summary>
+		/// lower renderLayers are in the front and higher are in the back, just like layerDepth but not clamped to 0-1. Note that this means
+		/// higher renderLayers are sent to the Batcher first. An important fact when using the stencil buffer.
+		/// </summary>
+		/// <value>The render layer.</value>
+		public new int RenderLayer
+		{
+			get => _renderLayer;
+			set => SetRenderLayer(value);
+		}
+
+		/// <summary>
+		/// lower renderLayers are in the front and higher are in the back, just like layerDepth but not clamped to 0-1. Note that this means
+		/// higher renderLayers are sent to the Batcher first. An important fact when using the stencil buffer.
+		/// </summary>
+		/// <returns>The render layer.</returns>
+		/// <param name="renderLayer">Render layer.</param>
+		public new RenderableComponent SetRenderLayer(int renderLayer)
+		{
+			if (renderLayer != _renderLayer && _spriteRenderer != null)
+			{
+				_spriteRenderer.RenderLayer = renderLayer;
+			}
+
+			base.SetRenderLayer(renderLayer);
+
+			return this;
+		}
+
 		public new RenderableComponent SetColor(Color color)
 		{
 			base.SetColor(color);
-			Entity.GetComponent<SpriteRenderer>()?.SetColor(color);
+			_spriteRenderer?.SetColor(color);
 			return this;
 		}
 
@@ -60,9 +90,10 @@ namespace Nez.ImGuiTools.SpriteWindows
 			RenderTarget = ResolveWindowRenderer().ResolveRenderTarget(this);
 
 			var sprite = new Sprite(RenderTarget);
-			var spriteRenderer = new SpriteRenderer(sprite);
-			spriteRenderer.SetColor(Color);
-			Entity.AddComponent(spriteRenderer);
+			_spriteRenderer = new SpriteRenderer(sprite);
+			_spriteRenderer.SetColor(Color);
+			_spriteRenderer.RenderLayer = RenderLayer;
+			Entity.AddComponent(_spriteRenderer);
 		}
 
 		public virtual void RenderImGuiWindow()
