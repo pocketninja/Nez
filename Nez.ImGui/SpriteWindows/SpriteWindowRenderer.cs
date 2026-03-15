@@ -38,7 +38,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 			for (var i = 0; i < scene.RenderableComponents.Count; i++)
 			{
 				var renderable = scene.RenderableComponents[i];
-				if (renderable is AbstractSpriteWindowComponent window)
+				if (renderable is AbstractSpriteWindowComponent window && window.RenderImGuiToTexture)
 				{
 					ImGui.SetCurrentContext(ResolveWindowContext(window));
 

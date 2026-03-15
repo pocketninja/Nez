@@ -9,6 +9,8 @@ namespace Nez.ImGuiTools.SpriteWindows
 {
 	public class AbstractSpriteWindowComponent : RenderableComponent, IUpdatable
 	{
+		public bool RenderImGuiToTexture = true;
+		
 		public virtual float WindowWidth => 300;
 		public virtual float WindowHeight => 200;
 
