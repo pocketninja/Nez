@@ -13,6 +13,8 @@ namespace Nez.ImGuiTools.SpriteWindows
 		protected Dictionary<uint, IntPtr> Contexts = new Dictionary<uint, IntPtr>();
 		protected unsafe ImFontAtlasPtr SharedFontAtlas;
 
+		public override bool WantsToRenderToSceneRenderTarget => false;
+
 		public SpriteWindowRenderer(int renderOrder) : base(renderOrder)
 		{
 		}
