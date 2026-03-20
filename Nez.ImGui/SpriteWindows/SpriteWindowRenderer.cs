@@ -27,7 +27,6 @@ namespace Nez.ImGuiTools.SpriteWindows
 		{
 			base.OnAddedToScene(scene);
 			SpriteWindowSystem.Initialize(Core.Instance);
-			// @TODO Maybe draw the mouse cursor ourselves? Old code at end of file... 
 		}
 
 		public override void Render(Scene scene)
@@ -69,6 +68,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 			// Need to switch temporarily to configure its IO...
 			var currentContext = ImGui.GetCurrentContext();
+			
 			ImGui.SetCurrentContext(newContext);
 			window.SetupStyle();
 
@@ -82,6 +82,8 @@ namespace Nez.ImGuiTools.SpriteWindows
 			else
 			{
 				io.NativePtr->Fonts = SharedFontAtlas.NativePtr;
+				// TODO: Do we have to share the image maybe??
+				// io.Fonts.SetTexID(ImGuiShared.FontTextureId);
 			}
 
 			ImGui.SetCurrentContext(currentContext);

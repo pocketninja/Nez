@@ -1,13 +1,14 @@
 using System;
-using System.Numerics;
 using ImGuiNET;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace Nez.ImGuiTools.SpriteWindows
 {
-	public class SpriteWindowSystem
+	public class AtlasSpriteWindowSystem
 	{
-		public static ImGuiRenderer Renderer;
+		protected Core Instance;
+		public ImGuiRenderer Renderer { get; protected set; }
 
 		private static int _scrollWheelValue;
 
@@ -20,20 +21,26 @@ namespace Nez.ImGuiTools.SpriteWindows
 		private static VirtualButton _gamepadFaceRight = new VirtualButton();
 		private static VirtualButton _gamepadFaceLeft = new VirtualButton();
 
-		public static void Initialize(Core instance)
+		public AtlasSpriteWindowSystem(Core instance)
 		{
-			if (Renderer != null)
-				return;
-			
-			Initialize(instance, new ImGuiOptions());
+			Instance = instance;
 		}
 
-		public static void Initialize(Core instance, ImGuiOptions options)
+		public void Initialize()
+		{
+			Initialize(new ImGuiOptions());
+		}
+
+
+		public void Initialize(ImGuiOptions options)
 		{
 			if (Renderer != null)
+			{
+				System.Console.WriteLine("AtlasSpriteWindowSystem has already been initialised");
 				return;
-			
-			Renderer = new ImGuiRenderer(instance);
+			}
+
+			Renderer = new ImGuiRenderer(Core.Instance);
 			Renderer.RebuildFontAtlas(options);
 
 			_gamepadDpadUp.Nodes.Add(new VirtualButton.GamePadButton(0, Buttons.DPadUp));
@@ -51,7 +58,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 			io.ConfigFlags |= ImGuiConfigFlags.NavEnableGamepad;
 			io.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;
-			
+
 			// Core.Instance.Window.TextInput += (s, a) =>
 			// {
 			// 	if (a.Character == '\t')
@@ -61,36 +68,49 @@ namespace Nez.ImGuiTools.SpriteWindows
 			// };
 		}
 
-		public static void BeforeLayout(float deltaTime, AbstractSpriteWindowComponent window)
-		{
-			ImGui.GetIO().DeltaTime = deltaTime;
-			UpdateInput(window);
-			ImGui.NewFrame();
-		}
-
-		private static void UpdateInput(AbstractSpriteWindowComponent window)
+		public void SendMouseInput(AbstractAtlasSpriteWindowComponent window, Rectangle slotRect)
 		{
 			var io = ImGui.GetIO();
-			// io.DisplaySize = new Vector2(
-			//     window.WindowWidth,
-			//     window.WindowHeight
-			// );
 
+			var mouse = Input.CurrentMouseState;
 
-			io.DisplaySize = new Vector2(
-				Core.GraphicsDevice.PresentationParameters.BackBufferWidth,
-				Core.GraphicsDevice.PresentationParameters.BackBufferHeight
+			var position = Core.Scene.Camera.ScreenToWorldPoint(mouse.Position);
+
+			// Adjust for the entity window position/rotation and size
+			var localPosition = Vector2.Transform(
+				position - window.Entity.Position,
+				Matrix.CreateRotationZ(-window.Entity.Rotation)
 			);
-			io.DisplayFramebufferScale = new Vector2(1f, 1f);
+			
+			localPosition /= window.Entity.Scale;
+			
+			// Account for the slot's position within the atlas.
+			localPosition += new Vector2(slotRect.X, slotRect.Y);
 
-			// Noop the input if the window isn't focused...
-			// if (!window.WindowIsFocused)
-			// {
-			// 	return;
-			// }
+			// Window size gets clamped to the atlas size, make sure we respect that.
+			var windowSize = new Vector2(
+				Math.Min(slotRect.Width, window.WindowWidth),
+				Math.Min(slotRect.Height, window.WindowHeight)
+			);
+			
+			localPosition += windowSize / 2f;
+			
+			io.AddMousePosEvent(localPosition.X, localPosition.Y);
+			io.MouseDrawCursor = window.DrawMouseCursor;
 
+			io.MouseDown[0] = mouse.LeftButton == ButtonState.Pressed;
+			io.MouseDown[1] = mouse.RightButton == ButtonState.Pressed;
+			io.MouseDown[2] = mouse.MiddleButton == ButtonState.Pressed;
 
-			var mouse = Nez.Input.CurrentMouseState;
+			var scrollDelta = mouse.ScrollWheelValue - _scrollWheelValue;
+			io.MouseWheel = scrollDelta > 0 ? 1 : scrollDelta < 0 ? -1 : 0;
+			_scrollWheelValue = mouse.ScrollWheelValue;
+		}
+
+		public void SendKeyboardInput(AbstractAtlasSpriteWindowComponent window)
+		{
+			var io = ImGui.GetIO();
+
 			var keyboard = Nez.Input.CurrentKeyboardState;
 
 			foreach (Keys key in Enum.GetValues(typeof(Keys)))
@@ -100,7 +120,6 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 				io.AddKeyEvent(translatedKey, isDown);
 			}
-
 
 			if (_gamepadDpadUp.IsPressed || _gamepadDpadUp.IsReleased)
 			{
@@ -146,29 +165,54 @@ namespace Nez.ImGuiTools.SpriteWindows
 			io.KeyCtrl = keyboard.IsKeyDown(Keys.LeftControl) || keyboard.IsKeyDown(Keys.RightControl);
 			io.KeyAlt = keyboard.IsKeyDown(Keys.LeftAlt) || keyboard.IsKeyDown(Keys.RightAlt);
 			io.KeySuper = keyboard.IsKeyDown(Keys.LeftWindows) || keyboard.IsKeyDown(Keys.RightWindows);
-
-			var position = Core.Scene.Camera.ScreenToWorldPoint(mouse.Position);
-
-			// Adjust for the entity window position/rotation and size
-			var localPosition = Microsoft.Xna.Framework.Vector2.Transform(
-				position - window.Entity.Position,
-				Microsoft.Xna.Framework.Matrix.CreateRotationZ(-window.Entity.Rotation)
-			);
-			localPosition /= window.Entity.Scale;
-			localPosition += new Microsoft.Xna.Framework.Vector2(window.WindowWidth, window.WindowHeight) / 2f;
-
-			// io.AddMousePosEvent(position.X, position.Y);
-			io.AddMousePosEvent(localPosition.X, localPosition.Y);
-			io.MouseDrawCursor = window.DrawMouseCursor;
-
-			io.MouseDown[0] = mouse.LeftButton == ButtonState.Pressed;
-			io.MouseDown[1] = mouse.RightButton == ButtonState.Pressed;
-			io.MouseDown[2] = mouse.MiddleButton == ButtonState.Pressed;
-
-			var scrollDelta = mouse.ScrollWheelValue - _scrollWheelValue;
-			io.MouseWheel = scrollDelta > 0 ? 1 : scrollDelta < 0 ? -1 : 0;
-			_scrollWheelValue = mouse.ScrollWheelValue;
 		}
+
+		public void SendGamepadInput(AbstractAtlasSpriteWindowComponent window)
+		{
+			var io = ImGui.GetIO();
+
+			if (_gamepadDpadUp.IsPressed || _gamepadDpadUp.IsReleased)
+			{
+				io.AddKeyEvent(ImGuiKey.GamepadDpadUp, _gamepadDpadUp.IsPressed);
+			}
+
+			if (_gamepadDpadDown.IsPressed || _gamepadDpadDown.IsReleased)
+			{
+				io.AddKeyEvent(ImGuiKey.GamepadDpadDown, _gamepadDpadDown.IsPressed);
+			}
+
+			if (_gamepadDpadRight.IsPressed || _gamepadDpadRight.IsReleased)
+			{
+				io.AddKeyEvent(ImGuiKey.GamepadDpadRight, _gamepadDpadRight.IsPressed);
+			}
+
+			if (_gamepadDpadLeft.IsPressed || _gamepadDpadLeft.IsReleased)
+			{
+				io.AddKeyEvent(ImGuiKey.GamepadDpadLeft, _gamepadDpadLeft.IsPressed);
+			}
+
+			if (_gamepadFaceUp.IsPressed || _gamepadFaceUp.IsReleased)
+			{
+				io.AddKeyEvent(ImGuiKey.GamepadFaceUp, _gamepadFaceUp.IsPressed);
+			}
+
+			if (_gamepadFaceDown.IsPressed || _gamepadFaceDown.IsReleased)
+			{
+				io.AddKeyEvent(ImGuiKey.GamepadFaceDown, _gamepadFaceDown.IsPressed);
+			}
+
+			if (_gamepadFaceRight.IsPressed || _gamepadFaceRight.IsReleased)
+			{
+				io.AddKeyEvent(ImGuiKey.GamepadFaceRight, _gamepadFaceRight.IsPressed);
+			}
+
+			if (_gamepadFaceLeft.IsPressed || _gamepadFaceLeft.IsReleased)
+			{
+				io.AddKeyEvent(ImGuiKey.GamepadFaceLeft, _gamepadFaceLeft.IsPressed);
+			}
+		}
+		
+		
 
 		public static ImGuiKey TranslateKey(Keys key)
 		{
@@ -339,11 +383,6 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 				default: return ImGuiKey.None;
 			}
-		}
-
-		public static void AfterLayout()
-		{
-			Renderer.AfterLayout();
 		}
 	}
 }
