@@ -28,6 +28,15 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 		protected Collider[] MouseOverWindowColliders = new Collider[3];
 		protected AbstractAtlasSpriteWindowComponent[] MouseOverWindows = new AbstractAtlasSpriteWindowComponent[3];
+		
+		protected ImGuiOptions Options;
+		
+
+		public AtlasSpriteWindowRenderer(ImGuiOptions options, int renderOrder = 0) : base(renderOrder)
+		{
+			Options = options;
+		}
+
 
 		public AtlasSpriteWindowRenderer(int renderOrder = 0) : base(renderOrder)
 		{
@@ -58,7 +67,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 			AtlasSystem = new AtlasSpriteWindowSystem(Core.Instance);
 
 			//TODO: Provide a way to pass in ImGuiOptions...
-			AtlasSystem.Initialize();
+			AtlasSystem.Initialize(Options ?? new ImGuiOptions());
 
 			InitializeTexture();
 		}
@@ -303,10 +312,10 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 			var io = ImGui.GetIO();
 			ImGui.GetIO().DeltaTime = Time.DeltaTime;
-			
+
 			io.DisplaySize = new System.Numerics.Vector2(AtlasWidth, AtlasHeight);
 			io.DisplayFramebufferScale = new System.Numerics.Vector2(1f, 1f);
-			
+
 			ImGui.NewFrame();
 		}
 	}
