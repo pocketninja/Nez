@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -22,7 +23,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 		/// <summary>
 		/// Width and height of the tiles.
 		/// </summary>
-		public int TileSize = 200;
+		public int TileSize = 500;
 
 		protected AbstractAtlasSpriteWindowComponent[] Slots;
 
@@ -48,12 +49,24 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 		public static AtlasSpriteWindowRenderer ResolveCurrentWindowRenderer(Scene scene = null)
 		{
-			var renderer = (scene ?? Core.Scene).GetRenderer<AtlasSpriteWindowRenderer>();
+			scene = scene ?? Core.Scene;
+			var renderers = scene._renderers;
 
+			AtlasSpriteWindowRenderer renderer = null;
+
+			for (int i = 0; i < renderers.Length; i++)
+			{
+				if (renderers[i] is AtlasSpriteWindowRenderer atlasRenderer)
+				{
+					renderer = atlasRenderer;
+					break;
+				}
+			}
+			
 			if (renderer == null)
 			{
 				System.Console.WriteLine(
-					"!! SpriteWindowRenderer was not present on the scene. It has been added, though the scene should do this explicitly."
+					"!! AtlasSpriteWindowRenderer was not present on the scene. It has been added, though the scene should do this explicitly."
 				);
 				renderer = Core.Scene.AddRenderer(new AtlasSpriteWindowRenderer());
 			}
@@ -164,6 +177,8 @@ namespace Nez.ImGuiTools.SpriteWindows
 						mouseOverWindows++;
 					}
 				}
+
+				MouseOverWindows = MouseOverWindows.OrderBy(window => window?.RenderLayer ?? 999999999).ToArray();
 			}
 
 			for (int i = 0; i < Slots.Length; i++)
@@ -194,6 +209,10 @@ namespace Nez.ImGuiTools.SpriteWindows
 							AtlasSystem.SendMouseInput(window, slotRect);
 							break;
 						}
+						
+						// For now, only take the top-most window (by render layer)... Maybe in the future we can handle multiple, but 
+						// with the way the atlas works that probably doesn't make any sense.
+						break;
 					}
 				}
 
@@ -213,7 +232,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 				ImGui.End();
 			}
 
-			AtlasSystem.Renderer.AfterLayout();
+			AfterLayout();
 
 			Core.GraphicsDevice.PresentationParameters.BackBufferWidth = originalPresentationWidth;
 			Core.GraphicsDevice.PresentationParameters.BackBufferHeight = originalPresentationHeight;
@@ -304,7 +323,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 				$"Tried to deallocate an atlas slot for window {component.Entity.Id}, but it was not in a slot!");
 		}
 
-		protected void BeforeLayout()
+		protected virtual void BeforeLayout()
 		{
 			// AtlasSystem.Renderer.BeforeLayout(Time.DeltaTime);
 			// ImGui.GetIO().DeltaTime = Time.DeltaTime;
@@ -317,6 +336,11 @@ namespace Nez.ImGuiTools.SpriteWindows
 			io.DisplayFramebufferScale = new System.Numerics.Vector2(1f, 1f);
 
 			ImGui.NewFrame();
+		}
+
+		protected virtual void AfterLayout()
+		{
+			AtlasSystem.Renderer.AfterLayout();
 		}
 	}
 }
