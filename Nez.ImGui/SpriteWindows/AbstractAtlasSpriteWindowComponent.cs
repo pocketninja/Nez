@@ -14,9 +14,11 @@ namespace Nez.ImGuiTools.SpriteWindows
 		public sealed override float Width => WindowWidth;
 		public sealed override float Height => WindowHeight;
 
+		public virtual ImGuiWindowFlags WindowResizeMode => ImGuiWindowFlags.NoResize;
+
 		public virtual ImGuiWindowFlags WindowFlags =>
 			ImGuiWindowFlags.NoCollapse
-			| ImGuiWindowFlags.NoResize
+			| WindowResizeMode
 			| ImGuiWindowFlags.NoTitleBar
 			| ImGuiWindowFlags.NoMove
 			| ImGuiWindowFlags.NoBringToFrontOnFocus;
@@ -97,9 +99,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 		public virtual void RenderImGuiWindow()
 		{
-			// ImGui.Begin(Entity.Name, WindowFlags);
 			RenderUi();
-			// ImGui.End();
 		}
 
 		protected virtual void RenderUi()

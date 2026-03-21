@@ -26,12 +26,13 @@ namespace Nez.ImGuiTools.SpriteWindows
 		public int TileSize = 500;
 
 		protected AbstractAtlasSpriteWindowComponent[] Slots;
+		protected NVector2[] RenderedSlotWindowSize;
 
 		protected Collider[] MouseOverWindowColliders = new Collider[3];
 		protected AbstractAtlasSpriteWindowComponent[] MouseOverWindows = new AbstractAtlasSpriteWindowComponent[3];
-		
+
 		protected ImGuiOptions Options;
-		
+
 
 		public AtlasSpriteWindowRenderer(ImGuiOptions options, int renderOrder = 0) : base(renderOrder)
 		{
@@ -62,7 +63,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 					break;
 				}
 			}
-			
+
 			if (renderer == null)
 			{
 				System.Console.WriteLine(
@@ -97,8 +98,9 @@ namespace Nez.ImGuiTools.SpriteWindows
 			var tileCount = Math.Floor((float)AtlasWidth / TileSize) * Math.Floor((float)AtlasHeight / TileSize);
 
 			var currentSlots = Slots;
+			var size = (int)tileCount;
 
-			Slots = new AbstractAtlasSpriteWindowComponent[(int)tileCount];
+			Slots = new AbstractAtlasSpriteWindowComponent[size];
 
 			System.Console.WriteLine($"...atlas has {tileCount} slots");
 
@@ -115,6 +117,13 @@ namespace Nez.ImGuiTools.SpriteWindows
 				{
 					Slots[i] = currentSlots[i];
 				}
+			}
+
+			// Rebuild the window size cache
+			RenderedSlotWindowSize = new NVector2[size];
+			for (int i = 0; i < size; i++)
+			{
+				RenderedSlotWindowSize[i] = NVector2.Zero;
 			}
 		}
 
@@ -184,16 +193,16 @@ namespace Nez.ImGuiTools.SpriteWindows
 				MouseOverWindows = MouseOverWindows.OrderBy(window => window?.RenderLayer ?? 999999999).ToArray();
 			}
 
-			for (int i = 0; i < Slots.Length; i++)
+			for (int slotIndex = 0; slotIndex < Slots.Length; slotIndex++)
 			{
-				var window = Slots[i];
+				var window = Slots[slotIndex];
 
 				if (window == null)
 				{
 					continue;
 				}
 
-				var slotRect = GetSlotSourceRect(i);
+				var slotRect = GetSlotSourceRect(slotIndex);
 
 				// The window had no rect, there might be too many windows!
 				if (slotRect.IsEmpty)
@@ -212,7 +221,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 							AtlasSystem.SendMouseInput(window, slotRect);
 							break;
 						}
-						
+
 						// For now, only take the top-most window (by render layer)... Maybe in the future we can handle multiple, but 
 						// with the way the atlas works that probably doesn't make any sense.
 						break;
@@ -223,20 +232,52 @@ namespace Nez.ImGuiTools.SpriteWindows
 				// AtlasSystem.SendGamepadInput(window);
 
 				ImGui.SetNextWindowPos(new NVector2(slotRect.X, slotRect.Y));
-				ImGui.SetNextWindowSize(new NVector2(
-					Math.Min(TileSize, window.WindowWidth),
-					Math.Min(TileSize, window.WindowHeight)
-				));
+
+				// Make sure windows are constrained to the atlas tile size.
+				ImGui.SetNextWindowSizeConstraints(
+					NVector2.Zero,
+					new NVector2(TileSize, TileSize)
+				);
+
+				// If the window is not auto-sizing, set the size explicitly.
+				if (!window.WindowFlags.HasFlag(ImGuiWindowFlags.AlwaysAutoResize))
+				{
+					ImGui.SetNextWindowSize(new NVector2(
+						window.WindowWidth,
+						window.WindowHeight
+					));
+				}
 
 				ImGui.Begin(window.Entity.Name, window.WindowFlags);
 
 				window.RenderImGuiWindow();
 
+				var windowSize = ImGui.GetWindowSize();
+				var lastWindowSize = RenderedSlotWindowSize[slotIndex];
+
+				if (lastWindowSize.X != windowSize.X || lastWindowSize.Y != windowSize.Y)
+				{
+					RenderedSlotWindowSize[slotIndex] = windowSize;
+
+					var rect = GetSlotSourceRect(slotIndex);
+					rect.Width = (int)windowSize.X;
+					rect.Height = (int)windowSize.Y;
+
+					// TODO: Check perf of this - this seems bad, but there's no way currently to resize a sprite.
+					// Could potentially change the origin and leave it at that?
+					window.SpriteRenderer.SetSprite(new Sprite(Atlas, rect));
+
+					if (window.Collider is BoxCollider box)
+					{
+						box.SetSize(rect.Width, rect.Height);
+					}
+				}
+
 				ImGui.End();
 			}
 
 			AfterLayout();
-			
+
 			ImGui.SetCurrentContext(currentContext);
 
 			Core.GraphicsDevice.PresentationParameters.BackBufferWidth = originalPresentationWidth;
