@@ -125,6 +125,9 @@ namespace Nez.ImGuiTools.SpriteWindows
 				return;
 			}
 
+			var currentContext = ImGui.GetCurrentContext();
+			ImGui.SetCurrentContext(AtlasSystem.Context);
+
 			var currentTargets = Core.GraphicsDevice.GetRenderTargets();
 
 			// In ImGuiRenderer.RenderDrawData(), it grabs the size of the back buffer explicitly, rather than the 
@@ -233,6 +236,8 @@ namespace Nez.ImGuiTools.SpriteWindows
 			}
 
 			AfterLayout();
+			
+			ImGui.SetCurrentContext(currentContext);
 
 			Core.GraphicsDevice.PresentationParameters.BackBufferWidth = originalPresentationWidth;
 			Core.GraphicsDevice.PresentationParameters.BackBufferHeight = originalPresentationHeight;

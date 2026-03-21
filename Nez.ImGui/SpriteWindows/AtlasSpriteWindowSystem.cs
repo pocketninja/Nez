@@ -9,6 +9,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 	{
 		protected Core Instance;
 		public ImGuiRenderer Renderer { get; protected set; }
+		public IntPtr Context { get; protected set; }
 
 		private static int _scrollWheelValue;
 
@@ -40,7 +41,9 @@ namespace Nez.ImGuiTools.SpriteWindows
 				return;
 			}
 
-			Renderer = new ImGuiRenderer(Core.Instance);
+			Context = ImGui.CreateContext();
+			
+			Renderer = new ImGuiRenderer(Core.Instance, Context);
 			Renderer.RebuildFontAtlas(options);
 
 			_gamepadDpadUp.Nodes.Add(new VirtualButton.GamePadButton(0, Buttons.DPadUp));

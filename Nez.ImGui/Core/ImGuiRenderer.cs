@@ -44,8 +44,11 @@ namespace Nez.ImGuiTools
 		List<int> _keys = new List<int>();
 
 
-		public ImGuiRenderer(Game game)
+		public ImGuiRenderer(Game game, IntPtr? imGuiContext = null)
 		{
+			ImGui.SetCurrentContext(imGuiContext ?? ImGui.CreateContext());
+			SetupInput();
+			
 			unsafe
 			{
 				_vertexDeclarationSize = sizeof(ImDrawVert);
@@ -64,7 +67,6 @@ namespace Nez.ImGuiTools
 				new VertexElement(16, VertexElementFormat.Color, VertexElementUsage.Color, 0)
 			);
 
-			ImGui.SetCurrentContext(ImGui.CreateContext());
 
 			_rasterizerState = new RasterizerState()
 			{
@@ -75,8 +77,6 @@ namespace Nez.ImGuiTools
 				ScissorTestEnable = true,
 				SlopeScaleDepthBias = 0
 			};
-
-			SetupInput();
 		}
 
 
