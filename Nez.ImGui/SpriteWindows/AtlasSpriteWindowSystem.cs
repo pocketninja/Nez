@@ -91,10 +91,11 @@ namespace Nez.ImGuiTools.SpriteWindows
 			localPosition += new Vector2(slotRect.X, slotRect.Y);
 
 			// Window size gets clamped to the atlas size, make sure we respect that.
-			var windowSize = new Vector2(
-				Math.Min(slotRect.Width, window.WindowWidth),
-				Math.Min(slotRect.Height, window.WindowHeight)
-			);
+			// var windowSize = new Vector2(
+			// 	Math.Min(slotRect.Width, window.WindowWidth),
+			// 	Math.Min(slotRect.Height, window.WindowHeight)
+			// );
+			var windowSize = (window.SpriteRenderer?.Sprite?.SourceRect.Size.ToVector2() ?? Vector2.Zero);
 			
 			localPosition += windowSize / 2f;
 			

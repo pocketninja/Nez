@@ -16,6 +16,9 @@ namespace Nez.ImGuiTools
 		const string kShowCoreWindow = "ImGui_ShowCoreWindow";
 		const string kShowSeperateGameWindow = "ImGui_ShowSeperateGameWindow";
 
+
+		private bool _originalGameIsMouseVisible = false;
+
 		[Flags]
 		enum WindowPosition
 		{
@@ -272,6 +275,9 @@ namespace Nez.ImGuiTools
 
 		public override void OnEnabled()
 		{
+			_originalGameIsMouseVisible = Core.Instance.IsMouseVisible;
+			Core.Instance.IsMouseVisible = true;
+			
 			if (Core.Scene != null)
 			{
 				Core.Scene.FinalRenderDelegate = this;
@@ -284,6 +290,8 @@ namespace Nez.ImGuiTools
 
 		public override void OnDisabled()
 		{
+			Core.Instance.IsMouseVisible = _originalGameIsMouseVisible;
+			
 			ResetRenderTarget();
 			if (Core.Scene != null)
 				Core.Scene.FinalRenderDelegate = null;
