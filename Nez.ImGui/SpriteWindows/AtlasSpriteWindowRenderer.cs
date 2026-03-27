@@ -58,7 +58,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 			for (int i = 0; i < renderers.Length; i++)
 			{
 				if (renderers[i] is AtlasSpriteWindowRenderer atlasRenderer)
-				{
+				{ 
 					renderer = atlasRenderer;
 					break;
 				}
