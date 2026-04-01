@@ -34,6 +34,12 @@ namespace Nez.ImGuiTools.SpriteWindows
 			set => SetRenderLayer(value);
 		}
 
+		public new float LayerDepth
+		{
+			get => _layerDepth;
+			set => SetLayerDepth(value);
+		}
+
 		/// <summary>
 		/// lower renderLayers are in the front and higher are in the back, just like layerDepth but not clamped to 0-1. Note that this means
 		/// higher renderLayers are sent to the Batcher first. An important fact when using the stencil buffer.
@@ -48,6 +54,18 @@ namespace Nez.ImGuiTools.SpriteWindows
 			}
 
 			base.SetRenderLayer(renderLayer);
+
+			return this;
+		}
+
+		public new RenderableComponent SetLayerDepth(float depth)
+		{
+			if (depth != _layerDepth && SpriteRenderer != null)
+			{
+				SpriteRenderer.LayerDepth = depth;
+			}
+
+			base.SetLayerDepth(depth);
 
 			return this;
 		}

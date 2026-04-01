@@ -350,6 +350,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 			var spriteRenderer = new SpriteRenderer(sprite);
 			spriteRenderer.SetColor(component.Color);
 			spriteRenderer.RenderLayer = component.RenderLayer;
+			spriteRenderer.LayerDepth = component.LayerDepth;
 
 			return spriteRenderer;
 		}

@@ -48,7 +48,7 @@ namespace Nez.ImGuiTools
 		{
 			ImGui.SetCurrentContext(imGuiContext ?? ImGui.CreateContext());
 			SetupInput();
-			
+
 			unsafe
 			{
 				_vertexDeclarationSize = sizeof(ImDrawVert);
@@ -94,7 +94,28 @@ namespace Nez.ImGuiTools
 				DefaultFontPtr = io.Fonts.AddFontDefault();
 
 			foreach (var font in options._fonts)
-				io.Fonts.AddFontFromFileTTF(font.Item1, font.Item2);
+			{
+				var file = font.Item1;
+				var size = font.Item2;
+				var glyphRange = font.Item3;
+
+				if (glyphRange.Length == 0)
+				{
+					io.Fonts.AddFontFromFileTTF(file, size);
+				}
+				else
+				{
+					fixed (ushort* p = glyphRange)
+					{
+						io.Fonts.AddFontFromFileTTF(
+							file,
+							size,
+							null,
+							(System.IntPtr)p
+						);
+					}
+				}
+			}
 
 			io.Fonts.GetTexDataAsRGBA32(out byte* pixelData, out int width, out int height, out int bytesPerPixel);
 
@@ -191,13 +212,13 @@ Marshal.GetFunctionPointerForDelegate<GetClipboardTextDelegate>(SDL2.SDL.SDL_Get
 			ImGui.GetIO().AddInputCharacter(c);
 		};
 #else
-		Core.Instance.Window.TextInput += (s, a) =>
-		{
-			if (a.Character == '\t')
-				return;
+			Core.Instance.Window.TextInput += (s, a) =>
+			{
+				if (a.Character == '\t')
+					return;
 
-			io.AddInputCharacter(a.Character);
-		};
+				io.AddInputCharacter(a.Character);
+			};
 #endif
 		}
 
@@ -234,7 +255,7 @@ Marshal.GetFunctionPointerForDelegate<GetClipboardTextDelegate>(SDL2.SDL.SDL_Get
 			{
 				var isDown = keyboard.IsKeyDown(key);
 				var translatedKey = TranslateKey(key);
-            
+
 				// TODO: This needs more work, specifically with regard to inputs for text fields/etc...
 				io.AddKeyEvent(translatedKey, isDown);
 			}
