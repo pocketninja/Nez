@@ -55,6 +55,8 @@ namespace Nez.ImGuiTools
 
 			LoadSettings();
 			_renderer = new ImGuiRenderer(Core.Instance);
+			
+			ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
 			_renderer.RebuildFontAtlas(options);
 			Core.Emitter.AddObserver(CoreEvents.SceneChanged, OnSceneChanged);
@@ -120,7 +122,7 @@ namespace Nez.ImGuiTools
 					if (ImGui.MenuItem("Open Sprite Atlas Editor"))
 						_spriteAtlasEditorWindow = _spriteAtlasEditorWindow ?? new SpriteAtlasEditorWindow();
 
-					if (ImGui.MenuItem("Quit ImGui"))
+					if (ImGui.MenuItem("Close Dev"))
 						SetEnabled(false);
 					ImGui.EndMenu();
 				}

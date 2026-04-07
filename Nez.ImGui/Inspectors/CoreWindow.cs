@@ -50,7 +50,7 @@ namespace Nez.ImGuiTools
 			{
 #if !FNA
 				ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * 0.5f);
-				NezImGui.DisableNextWidget();
+				ImGui.BeginDisabled(true);
 #endif
 
 				var currentTextureFilter = (int) Core.DefaultSamplerState.Filter;
@@ -59,6 +59,7 @@ namespace Nez.ImGuiTools
 						_textureFilters[currentTextureFilter]);
 
 #if !FNA
+				ImGui.EndDisabled();
 				ImGui.PopStyleVar();
 #endif
 			}
