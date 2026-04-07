@@ -541,6 +541,14 @@ namespace Nez.Persistence
 					}
 
 					// obj is a class.
+					
+					// Value is a boolean, and target is a string...
+					if (value is bool boolValue && field.FieldType == typeof(string))
+					{
+						field.SetValue(obj, boolValue ? "true" : "false");
+						return;
+					}
+					
 					field.SetValue(obj, value);
 					return;
 				}
