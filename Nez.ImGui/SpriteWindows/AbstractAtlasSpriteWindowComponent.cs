@@ -14,6 +14,8 @@ namespace Nez.ImGuiTools.SpriteWindows
 		public sealed override float Width => WindowWidth;
 		public sealed override float Height => WindowHeight;
 
+		public virtual int WindowPhysicsLayer => AtlasSpriteWindowRenderer.DefaultWindowPhysicsLayer;
+
 		public virtual ImGuiWindowFlags WindowResizeMode => ImGuiWindowFlags.NoResize;
 
 		public virtual ImGuiWindowFlags WindowFlags =>
@@ -86,15 +88,15 @@ namespace Nez.ImGuiTools.SpriteWindows
 		{
 			base.OnAddedToEntity();
 
-			AtlasSpriteWindowRenderer renderer = AtlasSpriteWindowRenderer.ResolveCurrentWindowRenderer(Entity.Scene);
+			AtlasSpriteWindowRenderer renderer = AtlasSpriteWindowRenderer.ResolveCurrentWindowRenderer(Entity.Scene, WindowPhysicsLayer);
 			SpriteRenderer = renderer.MakeAllocatedSprite(this);
 			Entity.AddComponent(SpriteRenderer);
 
 			Collider = new BoxCollider(SpriteRenderer.Sprite.SourceRect.Width, SpriteRenderer.Sprite.SourceRect.Height);
 			Collider.IsTrigger = true;
 			// TODO: Should this be some other value to prevent any collisions?
-			Collider.CollidesWithLayers = renderer.WindowPhysicsLayer;
-			Collider.PhysicsLayer = renderer.WindowPhysicsLayer;
+			Collider.CollidesWithLayers = WindowPhysicsLayer;
+			Collider.PhysicsLayer = WindowPhysicsLayer;
 			Entity.AddComponent(Collider);
 		}
 
@@ -102,7 +104,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 		{
 			base.OnRemovedFromEntity();
 
-			AtlasSpriteWindowRenderer renderer = AtlasSpriteWindowRenderer.ResolveCurrentWindowRenderer(Entity.Scene);
+			AtlasSpriteWindowRenderer renderer = AtlasSpriteWindowRenderer.ResolveCurrentWindowRenderer(Entity.Scene, WindowPhysicsLayer);
 			renderer.DeallocateFromAtlas(this);
 		}
 

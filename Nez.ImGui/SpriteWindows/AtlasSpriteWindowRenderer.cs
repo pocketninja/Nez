@@ -12,7 +12,9 @@ namespace Nez.ImGuiTools.SpriteWindows
 {
 	public class AtlasSpriteWindowRenderer : Renderer
 	{
-		public int WindowPhysicsLayer = 100_000;
+		public const int DefaultWindowPhysicsLayer = 100_000;
+
+		public int WindowPhysicsLayer = DefaultWindowPhysicsLayer;
 
 		public AtlasSpriteWindowSystem AtlasSystem { get; protected set; }
 		public RenderTarget2D Atlas;
@@ -48,7 +50,10 @@ namespace Nez.ImGuiTools.SpriteWindows
 		{
 		}
 
-		public static AtlasSpriteWindowRenderer ResolveCurrentWindowRenderer(Scene scene = null)
+		public static AtlasSpriteWindowRenderer ResolveCurrentWindowRenderer(
+			Scene scene = null,
+			int physicsLayer = DefaultWindowPhysicsLayer
+		)
 		{
 			scene = scene ?? Core.Scene;
 			var renderers = scene._renderers;
@@ -58,7 +63,12 @@ namespace Nez.ImGuiTools.SpriteWindows
 			for (int i = 0; i < renderers.Length; i++)
 			{
 				if (renderers[i] is AtlasSpriteWindowRenderer atlasRenderer)
-				{ 
+				{
+					if (atlasRenderer.WindowPhysicsLayer != physicsLayer)
+					{
+						continue;
+					}
+
 					renderer = atlasRenderer;
 					break;
 				}
@@ -67,9 +77,12 @@ namespace Nez.ImGuiTools.SpriteWindows
 			if (renderer == null)
 			{
 				System.Console.WriteLine(
-					"!! AtlasSpriteWindowRenderer was not present on the scene. It has been added, though the scene should do this explicitly."
+					$"!! AtlasSpriteWindowRenderer(physicsLayer:{physicsLayer}) was not present on the scene. It has been added, though the scene should do this explicitly."
 				);
-				renderer = Core.Scene.AddRenderer(new AtlasSpriteWindowRenderer());
+				renderer = Core.Scene.AddRenderer(new AtlasSpriteWindowRenderer()
+				{
+					WindowPhysicsLayer = physicsLayer
+				});
 			}
 
 			return renderer;
@@ -83,7 +96,14 @@ namespace Nez.ImGuiTools.SpriteWindows
 			//TODO: Provide a way to pass in ImGuiOptions...
 			AtlasSystem.Initialize(Options ?? new ImGuiOptions());
 
+			SetupTheme();
+
 			InitializeTexture();
+		}
+
+		protected virtual void SetupTheme()
+		{
+			NezImGuiThemes.DarkHighContrastTheme();
 		}
 
 		protected void InitializeTexture()
@@ -367,15 +387,12 @@ namespace Nez.ImGuiTools.SpriteWindows
 			}
 
 			System.Console.WriteLine(
-				$"Tried to deallocate an atlas slot for window {component.Entity.Id}, but it was not in a slot!");
+				$"Tried to deallocate an atlas slot for window {component.Entity.Id}, but it was not in a slot!"
+			);
 		}
 
 		protected virtual void BeforeLayout()
 		{
-			// AtlasSystem.Renderer.BeforeLayout(Time.DeltaTime);
-			// ImGui.GetIO().DeltaTime = Time.DeltaTime;
-			// ImGui.NewFrame();
-
 			var io = ImGui.GetIO();
 			ImGui.GetIO().DeltaTime = Time.DeltaTime;
 
