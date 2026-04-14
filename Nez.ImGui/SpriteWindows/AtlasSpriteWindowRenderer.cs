@@ -381,6 +381,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 			{
 				if (Slots[i] == component)
 				{
+					RenderedSlotWindowSize[i] = NVector2.Zero;
 					Slots[i] = null;
 					return;
 				}
