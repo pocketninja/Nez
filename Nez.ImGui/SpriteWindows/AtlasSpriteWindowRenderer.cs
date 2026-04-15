@@ -278,19 +278,12 @@ namespace Nez.ImGuiTools.SpriteWindows
 				if (lastWindowSize.X != windowSize.X || lastWindowSize.Y != windowSize.Y)
 				{
 					RenderedSlotWindowSize[slotIndex] = windowSize;
-
+					
 					var rect = GetSlotSourceRect(slotIndex);
 					rect.Width = (int)windowSize.X;
 					rect.Height = (int)windowSize.Y;
 
-					// TODO: Check perf of this - this seems bad, but there's no way currently to resize a sprite.
-					// Could potentially change the origin and leave it at that?
-					window.SpriteRenderer.SetSprite(new Sprite(Atlas, rect));
-
-					if (window.Collider is BoxCollider box)
-					{
-						box.SetSize(rect.Width, rect.Height);
-					}
+					window.UpdateRects(rect);
 				}
 
 				ImGui.End();

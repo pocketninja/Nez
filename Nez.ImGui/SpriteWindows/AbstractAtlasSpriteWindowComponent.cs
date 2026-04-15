@@ -1,13 +1,14 @@
 using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Nez.Sprites;
+using Nez.Textures;
 
 namespace Nez.ImGuiTools.SpriteWindows
 {
 	public abstract class AbstractAtlasSpriteWindowComponent : RenderableComponent, IUpdatable
 	{
 		public virtual bool ShouldReceiveInput => true;
-		
+
 		public virtual float WindowWidth => 300;
 		public virtual float WindowHeight => 200;
 
@@ -24,6 +25,8 @@ namespace Nez.ImGuiTools.SpriteWindows
 			| ImGuiWindowFlags.NoTitleBar
 			| ImGuiWindowFlags.NoMove
 			| ImGuiWindowFlags.NoBringToFrontOnFocus;
+
+		public WindowAnchor Anchor = WindowAnchor.Center;
 
 		public SpriteRenderer SpriteRenderer { get; protected set; }
 		public Collider Collider { get; protected set; }
@@ -88,7 +91,8 @@ namespace Nez.ImGuiTools.SpriteWindows
 		{
 			base.OnAddedToEntity();
 
-			AtlasSpriteWindowRenderer renderer = AtlasSpriteWindowRenderer.ResolveCurrentWindowRenderer(Entity.Scene, WindowPhysicsLayer);
+			AtlasSpriteWindowRenderer renderer =
+				AtlasSpriteWindowRenderer.ResolveCurrentWindowRenderer(Entity.Scene, WindowPhysicsLayer);
 			SpriteRenderer = renderer.MakeAllocatedSprite(this);
 			Entity.AddComponent(SpriteRenderer);
 
@@ -104,7 +108,8 @@ namespace Nez.ImGuiTools.SpriteWindows
 		{
 			base.OnRemovedFromEntity();
 
-			AtlasSpriteWindowRenderer renderer = AtlasSpriteWindowRenderer.ResolveCurrentWindowRenderer(Entity.Scene, WindowPhysicsLayer);
+			AtlasSpriteWindowRenderer renderer =
+				AtlasSpriteWindowRenderer.ResolveCurrentWindowRenderer(Entity.Scene, WindowPhysicsLayer);
 			renderer.DeallocateFromAtlas(this);
 		}
 
@@ -127,6 +132,76 @@ namespace Nez.ImGuiTools.SpriteWindows
 			ImGui.Text("This AtlasSpriteWindowComponent did not declare any UI...");
 			ImGui.Text("FPS: " + (int)(1f / Time.DeltaTime));
 			ImGui.Text("S: " + Screen.Width + "x" + Screen.Height);
+		}
+
+		public void UpdateRects(Rectangle newRect)
+		{
+			// TODO: Check perf of this - this seems bad, but there's no way currently to resize a sprite.
+			// Could potentially change the origin and leave it at that?
+			SpriteRenderer.SetSprite(new Sprite(SpriteRenderer.Sprite.Texture2D, newRect));
+
+			Vector2 origin;
+			var halfSize = newRect.GetHalfSize();
+
+			switch (Anchor)
+			{
+				case WindowAnchor.TopLeft:
+					origin = Vector2.Zero;
+					break;
+				case WindowAnchor.TopCenter:
+					origin = new Vector2(halfSize.X, 0);
+					break;
+				case WindowAnchor.TopRight:
+					origin = new Vector2(newRect.Width, 0);
+					break;
+				case WindowAnchor.BottomLeft:
+					origin = new Vector2(0, newRect.Height);
+					break;
+				case WindowAnchor.BottomCenter:
+					origin = new Vector2(halfSize.X, newRect.Height);
+					break;
+				case WindowAnchor.BottomRight:
+					origin = new Vector2(newRect.Width, newRect.Height);
+					break;
+				default:
+					origin = halfSize;
+					break;
+			}
+
+			SpriteRenderer.SetOrigin(origin);
+
+			if (Collider is BoxCollider box)
+			{
+				box.SetSize(newRect.Width, newRect.Height);
+
+				Vector2 offset;
+				switch (Anchor)
+				{
+					case WindowAnchor.TopLeft:
+						offset = new Vector2(halfSize.X, halfSize.Y);
+						break;
+					case WindowAnchor.TopCenter:
+						offset = new Vector2(0, halfSize.Y);
+						break;
+					case WindowAnchor.TopRight:
+						offset = new Vector2(-halfSize.X, halfSize.Y);
+						break;
+					case WindowAnchor.BottomLeft:
+						offset = new Vector2(halfSize.X, -halfSize.Y);
+						break;
+					case WindowAnchor.BottomCenter:
+						offset = new Vector2(0, -halfSize.Y);
+						break;
+					case WindowAnchor.BottomRight:
+						offset = new Vector2(-halfSize.X, -halfSize.Y);
+						break;
+					default:
+						offset = Vector2.Zero;
+						break;
+				}
+
+				box.SetLocalOffset(offset);
+			}
 		}
 	}
 }

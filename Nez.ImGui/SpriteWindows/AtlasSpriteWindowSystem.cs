@@ -42,7 +42,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 			}
 
 			Context = ImGui.CreateContext();
-			
+
 			Renderer = new ImGuiRenderer(Core.Instance, Context);
 			Renderer.RebuildFontAtlas(options);
 
@@ -79,14 +79,45 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 			var position = Core.Scene.Camera.ScreenToWorldPoint(mouse.Position);
 
+			var anchorOffset = Vector2.Zero;
+
+			if (window.Anchor != WindowAnchor.Center)
+			{
+				var spriteRect = window.SpriteRenderer.Sprite.SourceRect;
+				var halfSpriteSize = spriteRect.GetHalfSize();
+				switch (window.Anchor)
+				{
+					case WindowAnchor.TopLeft:
+						anchorOffset = -halfSpriteSize;
+						break;
+					case WindowAnchor.TopCenter:
+						anchorOffset = new Vector2(0f, -halfSpriteSize.Y);
+						break;
+					case WindowAnchor.TopRight:
+						anchorOffset = new Vector2(halfSpriteSize.X, -halfSpriteSize.Y);
+						break;
+					case WindowAnchor.BottomLeft:
+						anchorOffset = new Vector2(-halfSpriteSize.X, halfSpriteSize.Y);
+						break;
+					case WindowAnchor.BottomCenter:
+						anchorOffset = new Vector2(0f, halfSpriteSize.Y);
+						break;
+					case WindowAnchor.BottomRight:
+						anchorOffset = new Vector2(halfSpriteSize.X, halfSpriteSize.Y);
+						break;
+				}
+			}
+
+			anchorOffset *= window.Transform.Scale;
+
 			// Adjust for the entity window position/rotation and size
 			var localPosition = Vector2.Transform(
 				position - window.Entity.Position,
 				Matrix.CreateRotationZ(-window.Entity.Rotation)
-			);
-			
+			) + anchorOffset;
+
 			localPosition /= window.Entity.Scale;
-			
+
 			// Account for the slot's position within the atlas.
 			localPosition += new Vector2(slotRect.X, slotRect.Y);
 
@@ -96,9 +127,9 @@ namespace Nez.ImGuiTools.SpriteWindows
 			// 	Math.Min(slotRect.Height, window.WindowHeight)
 			// );
 			var windowSize = (window.SpriteRenderer?.Sprite?.SourceRect.Size.ToVector2() ?? Vector2.Zero);
-			
+
 			localPosition += windowSize / 2f;
-			
+
 			io.AddMousePosEvent(localPosition.X, localPosition.Y);
 			io.MouseDrawCursor = window.DrawMouseCursor;
 
@@ -215,8 +246,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 				io.AddKeyEvent(ImGuiKey.GamepadFaceLeft, _gamepadFaceLeft.IsPressed);
 			}
 		}
-		
-		
+
 
 		public static ImGuiKey TranslateKey(Keys key)
 		{
