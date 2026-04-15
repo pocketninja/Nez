@@ -34,8 +34,7 @@ namespace Nez.ImGuiTools.SpriteWindows
 		protected AbstractAtlasSpriteWindowComponent[] MouseOverWindows = new AbstractAtlasSpriteWindowComponent[3];
 
 		protected ImGuiOptions Options;
-
-
+		
 		public AtlasSpriteWindowRenderer(ImGuiOptions options, int renderOrder = 0) : base(renderOrder)
 		{
 			Options = options;
@@ -91,9 +90,9 @@ namespace Nez.ImGuiTools.SpriteWindows
 		public override void OnAddedToScene(Scene scene)
 		{
 			base.OnAddedToScene(scene);
+			
 			AtlasSystem = new AtlasSpriteWindowSystem(Core.Instance);
 
-			//TODO: Provide a way to pass in ImGuiOptions...
 			AtlasSystem.Initialize(Options ?? new ImGuiOptions());
 
 			SetupTheme();
@@ -168,7 +167,11 @@ namespace Nez.ImGuiTools.SpriteWindows
 			Core.GraphicsDevice.PresentationParameters.BackBufferWidth = AtlasWidth;
 			Core.GraphicsDevice.PresentationParameters.BackBufferHeight = AtlasHeight;
 
+			var originalSamplerState = Core.GraphicsDevice.SamplerStates[0];
+			
 			Core.GraphicsDevice.SetRenderTarget(Atlas);
+			Core.GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
+			
 			Core.GraphicsDevice.Clear(Color.Transparent);
 
 			BeforeLayout();
@@ -295,7 +298,8 @@ namespace Nez.ImGuiTools.SpriteWindows
 
 			Core.GraphicsDevice.PresentationParameters.BackBufferWidth = originalPresentationWidth;
 			Core.GraphicsDevice.PresentationParameters.BackBufferHeight = originalPresentationHeight;
-
+			
+			Core.GraphicsDevice.SamplerStates[0] = originalSamplerState;
 			Core.GraphicsDevice.SetRenderTargets(currentTargets);
 		}
 
